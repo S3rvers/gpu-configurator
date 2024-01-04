@@ -1,6 +1,7 @@
 package com.amalitech.gpuconfigurator.service.user;
 
 import com.amalitech.gpuconfigurator.dto.*;
+import com.amalitech.gpuconfigurator.dto.otp.ResendOtpDto;
 import jakarta.mail.MessagingException;
 import org.apache.coyote.BadRequestException;
 
@@ -11,9 +12,11 @@ public interface UserService {
 
     AuthenticationResponse verifyUserSignup(VerifyUserDto request);
 
-    String changePassword(ChangePasswordDTO changePasswordDTO);
+    GenericResponse changePassword(ChangePasswordDTO changePasswordDTO) throws BadRequestException;
 
     void verifyResetOtp(VerifyOtpDTO verifyOtpDTO);
 
     void resetPassword(ResetPasswordDTO resetPasswordDto) throws MessagingException;
+
+    GenericResponse resendOtp(ResendOtpDto resend) throws MessagingException;
 }

@@ -1,6 +1,7 @@
 package com.amalitech.gpuconfigurator.controller;
 
 import com.amalitech.gpuconfigurator.dto.*;
+import com.amalitech.gpuconfigurator.dto.otp.ResendOtpDto;
 import com.amalitech.gpuconfigurator.service.user.UserService;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,13 @@ public class AuthController {
     }
 
     @CrossOrigin
+    @PostMapping("/v1/auth/resend-otp")
+    public ResponseEntity<GenericResponse> resendOtp(@RequestBody ResendOtpDto resend) throws MessagingException {
+        GenericResponse response = userService.resendOtp(resend);
+        return ResponseEntity.ok(response);
+    }
+
+    @CrossOrigin
     @PostMapping("/v1/auth/login")
     public ResponseEntity<AuthenticationResponse> login(@RequestBody LoginDto request) {
         return ResponseEntity.ok(userService.login(request));
@@ -63,11 +71,11 @@ public class AuthController {
 
     @CrossOrigin
     @PostMapping("/v1/auth/change-password")
-    public ResponseEntity<String> changePassword(
+    public ResponseEntity<GenericResponse> changePassword(
             @Validated @RequestBody ChangePasswordDTO changePasswordDTO
 
-    ) {
-        return ResponseEntity.ok(userService.changePassword(changePasswordDTO));
+    ) throws BadRequestException {
+        GenericResponse changePasswordResponse = userService.changePassword(changePasswordDTO);
+        return ResponseEntity.ok(changePasswordResponse);
     }
-
 }

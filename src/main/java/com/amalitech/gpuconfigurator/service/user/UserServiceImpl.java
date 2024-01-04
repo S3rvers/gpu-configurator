@@ -1,6 +1,7 @@
 package com.amalitech.gpuconfigurator.service.user;
 
 import com.amalitech.gpuconfigurator.dto.*;
+import com.amalitech.gpuconfigurator.dto.otp.ResendOtpDto;
 import com.amalitech.gpuconfigurator.model.OtpType;
 import com.amalitech.gpuconfigurator.model.Role;
 import com.amalitech.gpuconfigurator.model.User;
@@ -97,6 +98,7 @@ public class UserServiceImpl implements UserService {
 
     }
 
+    @Override
     public void resetPassword(ResetPasswordDTO resetPasswordDTO) throws MessagingException {
         User user = repository.findByEmail(resetPasswordDTO.getEmail()).orElseThrow(() -> new UsernameNotFoundException("we have sent you an email"));
 
@@ -105,6 +107,7 @@ public class UserServiceImpl implements UserService {
         emailService.sendOtpMessage(user.getEmail(), otp, OtpType.RESET);
     }
 
+    @Override
     public void verifyResetOtp(VerifyOtpDTO verifyOtpDTO) {
         boolean isValidOtp = otpService.isValidOtp(verifyOtpDTO.getEmail(), verifyOtpDTO.getOtpCode(), OtpType.RESET);
         if (!isValidOtp) {
@@ -112,27 +115,26 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    public String changePassword(ChangePasswordDTO changePasswordDTO) {
-        String email = changePasswordDTO.getEmail();
-        String otpCode = changePasswordDTO.getOtpCode();
-        if (otpService.isValidOtp(email, otpCode, OtpType.RESET)) {
-            otpService.deleteOtp(email, otpCode);
-            if (updateUserPassword(email, changePasswordDTO.getNewPassword())) {
-                return "Password was changed successfully";
-            }
+    @Override
+    public GenericResponse changePassword(ChangePasswordDTO changePasswordDTO) throws BadRequestException {
+        User user = repository.findByEmail(changePasswordDTO.getEmail()).orElseThrow(() -> new UsernameNotFoundException("cannot change password, try again"));
+        Boolean otpValid = otpService.isValidOtp(changePasswordDTO.getEmail(), changePasswordDTO.getOtpCode(), OtpType.RESET);
+        if(!otpValid) {
+            throw new BadRequestException("could not change password");
         }
-        return "Invalid OTP";
+
+        user.setPassword(passwordEncoder.encode(changePasswordDTO.newPassword));
+        repository.save(user);
+        return new GenericResponse(201, "user changed password successfully");
     }
 
-    private boolean updateUserPassword(String email, String newPassword) {
-        Optional<User> optionalUser = repository.findByEmail(email);
-        if (optionalUser.isPresent()) {
-            var user = optionalUser.get();
-            user.setPassword(passwordEncoder.encode(newPassword));
-            repository.save(user);
-            return true;
-        }
-        return false;
+    @Override
+    public GenericResponse resendOtp(ResendOtpDto resend) throws MessagingException {
+        User user = repository.findByEmail(resend.email()).orElseThrow(() -> new UsernameNotFoundException("could not send otp as this user does not exist"));
+        String otp = otpService.generateAndSaveOtp(user, OtpType.valueOf(resend.type()));
+        emailService.sendOtpMessage(user.getEmail(), otp, OtpType.valueOf(resend.type()));
+
+        return new GenericResponse(201, "otp has been sent");
     }
 
 
