@@ -42,10 +42,6 @@ public class Otp {
     @Column(nullable = false)
     private LocalDateTime expiration;
 
-    @OneToOne
-    @JoinColumn(name = "user_id", unique = true)
-    private User user;
-
     @Column(name = "createdAt", updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdAt;
 

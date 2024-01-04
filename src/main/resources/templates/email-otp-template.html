@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Email</title>
+</head>
+<body>
+<div>
+    <h2>Hi there!</h2>
+    <p>
+        Your One-Time Password (OTP) for authentication is:
+    </p>
+    <h3 th:text="${otp}" style="color: #007bff;"></h3>
+    <p>
+        Please use this OTP to complete your authentication process. This OTP is valid for a limited time.
+    </p>
+    <p>
+        If you did not request this OTP, please ignore this email.
+    </p>
+    <p>
+        Best regards,
+        <br/>
+        Your Application Team
+    </p>
+</div>
+</body>
+</html>
